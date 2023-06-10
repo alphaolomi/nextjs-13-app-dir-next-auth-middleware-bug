@@ -1,3 +1,94 @@
+## bug reproduction
+
+### steps to reproduce
+- Create new Next.js app using CNA `create-next-app --version => 13.4.4`
+- Add `next-auth` `"next-auth": "4.22.1",`
+- Configure Credentials provider `app/api/auth/[...nextauth].ts`
+- Configure Middleware see https://next-auth.js.org/configuration/nextjs#middleware
+- `yarn run build`
+
+Note: All variants of the following middleware configuration fail.
+
+```ts
+export { default } from "next-auth/middleware"
+```
+
+```ts
+export { default } from "next-auth/middleware"
+
+export const config = { matcher: ["/dashboard"] }
+```
+
+```ts
+import { withAuth } from "next-auth/middleware"
+
+export default withAuth(
+  // `withAuth` augments your `Request` with the user's token.
+  function middleware(req) {
+    console.log(req.nextauth.token)
+  },
+)
+
+export const config = { matcher: ["/admin"] }
+```
+
+### expected behavior
+
+- build succeeds
+
+### actual behavior
+
+- build fails with error
+
+```bash
+> yarn run build
+Failed to compile.
+
+./node_modules/.pnpm/next-auth@4.22.1_next@13.4.4_react-dom@18.2.0_react@18.2.0/node_modules/next-auth/next/middleware.js
+Module parse failed: Identifier 'NextResponse' has already been declared (3:6)
+File was processed with these loaders:
+ * ./node_modules/.pnpm/next@13.4.4_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js
+You may need an additional loader to handle the result of these loaders.
+| "use strict";
+| const NextResponse = require("next/dist/server/web/spec-extension/response").NextResponse;
+> const NextResponse = require("next/dist/server/web/spec-extension/response").NextResponse;
+| var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+| Object.defineProperty(exports, "__esModule", {
+
+Import trace for requested module:
+./node_modules/.pnpm/next-auth@4.22.1_next@13.4.4_react-dom@18.2.0_react@18.2.0/node_modules/next-auth/next/middleware.js
+./node_modules/.pnpm/next-auth@4.22.1_next@13.4.4_react-dom@18.2.0_react@18.2.0/node_modules/next-auth/middleware.js
+
+
+> Build failed because of webpack errors
+error Command failed with exit code 1.   
+```
+
+### Env info
+
+- `envinfo --system --binaries --browsers --npmPackages "next,react,next-auth,@auth/*"`
+
+```yaml
+
+  System:
+    OS: macOS 13.4
+    CPU: (4) x64 Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
+    Memory: 44.16 MB / 8.00 GB
+    Shell: 5.9 - /bin/zsh
+  Binaries:
+    Node: 20.2.0 - /usr/local/bin/node
+    Yarn: 1.22.19 - /usr/local/bin/yarn
+    npm: 9.6.7 - /usr/local/bin/npm
+  Browsers:
+    Brave Browser: 114.1.52.122
+    Chrome: 113.0.5672.126
+    Edge: 110.0.1587.63
+    Safari: 16.5
+
+
+```
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
